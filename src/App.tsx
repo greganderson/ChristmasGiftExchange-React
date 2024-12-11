@@ -21,6 +21,8 @@ function App() {
   const [confettiPosition, setConfettiPosition] = useState<{
     x: number;
     y: number;
+    w: number;
+    h: number;
   } | null>(null);
 
   useEffect(() => {
@@ -68,6 +70,8 @@ function App() {
     setConfettiPosition({
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2,
+      w: 0,
+      h: 0,
     });
 
     // Reset confetti after 2 seconds
