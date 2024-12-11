@@ -32,7 +32,7 @@
   filter: drop-shadow(0 0 2em #646cffaa);
 }
 
-.logo.react:hover {
+.logo.dross:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
@@ -47,8 +47,8 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .logo.react {
-    animation: logo-spin infinite 20s linear;
+  .logo.dross {
+    animation: logo-spin infinite 1s linear;
   }
 }
 

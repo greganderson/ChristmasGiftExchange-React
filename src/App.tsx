@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
+import dross from "./assets/dross.png";
 import viteLogo from "/favicon.svg";
 import Select from "react-select";
 import "./App.css";
+import ReactConfetti from "react-confetti";
 
 function App() {
   const [selected, setSelected] = useState<{
@@ -16,6 +17,11 @@ function App() {
     { name: "Greg", target: "???" },
     { name: "Stephen", target: "???" },
   ]);
+
+  const [confettiPosition, setConfettiPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   useEffect(() => {
     if (selected) {
@@ -57,12 +63,56 @@ function App() {
 
   //const year = new Date().getFullYear();
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setConfettiPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    });
+
+    // Reset confetti after 2 seconds
+    setTimeout(() => setConfettiPosition(null), 2000);
+  };
+
   return (
     <>
+      {confettiPosition && (
+        <ReactConfetti
+          recycle={false}
+          numberOfPieces={200}
+          confettiSource={confettiPosition}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+          }}
+        />
+      )}
       <div className="logo-container">
-        <img src={viteLogo} className="logo" alt="Christmas tree" />
-        <img src={reactLogo} className="logo react" alt="React logo" />
-        <img src={viteLogo} className="logo" alt="Christmas tree" />
+        <img
+          src={viteLogo}
+          className="logo"
+          alt="Christmas tree"
+          onClick={handleLogoClick}
+          style={{ cursor: "pointer" }}
+        />
+        <img
+          src={dross}
+          className="logo dross"
+          alt="React logo"
+          onClick={handleLogoClick}
+          style={{ cursor: "pointer" }}
+        />
+        <img
+          src={viteLogo}
+          className="logo"
+          alt="Christmas tree"
+          onClick={handleLogoClick}
+          style={{ cursor: "pointer" }}
+        />
       </div>
       <h1>Christmas Gift Exchange</h1>
       <Select
