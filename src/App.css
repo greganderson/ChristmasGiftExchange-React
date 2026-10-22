@@ -18,22 +18,36 @@
   align-items: center;
 }
 
-@media (max-width: 768px) {
-  .logo-container {
-    flex-direction: column;
-  }
-
-  .logo-container img:last-child {
-    display: none;
-  }
+.logo-button {
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.logo:hover {
+.logo-button:focus-visible .logo {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
 
-.logo.dross:hover {
+.logo-button:focus-visible .logo.dross {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+/* Touch screens keep :hover applied after a tap, so only hover with a mouse */
+@media (hover: hover) {
+  .logo-button:hover .logo {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+
+  .logo-button:hover .logo.dross {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+  }
+
+  .assignment-row:hover {
+    transform: scale(1.02);
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
 
 @keyframes logo-spin {
@@ -74,11 +88,6 @@
   transition: all 0.2s ease;
 }
 
-.assignment-row:hover {
-  transform: scale(1.02);
-  background: rgba(255, 255, 255, 0.15);
-}
-
 .giver,
 .receiver {
   font-weight: 500;
@@ -88,4 +97,19 @@
 .arrow {
   color: #646cff;
   font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .logo {
+    height: 4em;
+    padding: 0.75em;
+  }
+
+  .card {
+    padding: 1em;
+  }
 }

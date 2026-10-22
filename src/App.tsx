@@ -1,137 +1,157 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import dross from "./assets/dross.png";
 import viteLogo from "/favicon.svg";
 import Select from "react-select";
 import "./App.css";
 import ReactConfetti from "react-confetti";
 
+const BRETHREN = ["Christian", "Peter", "Greg", "Stephen"];
+const FIRST_YEAR = 2020;
+const currentYear = new Date().getFullYear();
+
+const yearOptions = Array.from(
+  { length: currentYear + 5 - FIRST_YEAR + 1 },
+  (_, i) => ({ value: FIRST_YEAR + i, label: FIRST_YEAR + i })
+);
+
 function App() {
-  const [selected, setSelected] = useState<{
-    value: number;
-    label: number;
-  } | null>(null);
+  const [selected, setSelected] = useState(
+    yearOptions.find((option) => option.value === currentYear) ?? null
+  );
 
-  const [targetBrethren, setTargetBrethren] = useState([
-    { name: "Christian", target: "???" },
-    { name: "Peter", target: "???" },
-    { name: "Greg", target: "???" },
-    { name: "Stephen", target: "???" },
-  ]);
-
-  const [confettiPosition, setConfettiPosition] = useState<{
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  } | null>(null);
-
-  useEffect(() => {
-    if (selected) {
-      // Create initial rotation where everyone gets the next person
-      const newTargets = targetBrethren.map(
-        (_, i) => targetBrethren[(i + 1) % targetBrethren.length].name
-      );
-
-      // Rotate the targets based on the year
-      const rotations = selected.value % (targetBrethren.length - 1);
-      for (let i = 0; i < rotations; i++) {
-        newTargets.push(newTargets.shift()!);
-      }
-
-      // Update the targets
-      setTargetBrethren(
-        targetBrethren.map((brother, i) => ({
-          ...brother,
-          target: newTargets[i],
-        }))
-      );
+  const targetBrethren = useMemo(() => {
+    if (!selected) {
+      return BRETHREN.map((name) => ({ name, target: "???" }));
     }
+
+    // Create initial rotation where everyone gets the next person
+    const targets = BRETHREN.map((_, i) => BRETHREN[(i + 1) % BRETHREN.length]);
+
+    // Rotate the targets based on the year
+    const rotations = selected.value % (BRETHREN.length - 1);
+    for (let i = 0; i < rotations; i++) {
+      targets.push(targets.shift()!);
+    }
+
+    return BRETHREN.map((name, i) => ({ name, target: targets[i] }));
   }, [selected]);
 
-  const options = [
-    { value: 2020, label: 2020 },
-    { value: 2021, label: 2021 },
-    { value: 2022, label: 2022 },
-    { value: 2023, label: 2023 },
-    { value: 2024, label: 2024 },
-    { value: 2025, label: 2025 },
-    { value: 2026, label: 2026 },
-    { value: 2027, label: 2027 },
-    { value: 2028, label: 2028 },
-    { value: 2029, label: 2029 },
-    { value: 2030, label: 2030 },
-    { value: 2031, label: 2031 },
-  ];
+  const [confettiBursts, setConfettiBursts] = useState<
+    {
+      id: number;
+      width: number;
+      height: number;
+      source: { x: number; y: number; w: number; h: number };
+    }[]
+  >([]);
 
-  //const year = new Date().getFullYear();
-
-  const handleLogoClick = (e: React.MouseEvent<HTMLImageElement>) => {
+  const handleLogoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setConfettiPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-      w: 0,
-      h: 0,
+    setConfettiBursts((bursts) => [
+      ...bursts,
+      {
+        id: Date.now() + Math.random(),
+        // react-confetti otherwise sizes its canvas from the window size at
+        // page load, which misplaces the burst if the screen size has changed
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+        source: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+          w: 0,
+          h: 0,
+        },
+      },
+    ]);
+  };
+
+  // react-select only scrolls the selected year to the edge of the menu,
+  // so wait for it to render and then center it ourselves
+  const centerSelectedYear = () => {
+    requestAnimationFrame(() => {
+      const menuList = document.querySelector<HTMLElement>(
+        ".year-select__menu-list"
+      );
+      const option = menuList?.querySelector<HTMLElement>(
+        ".year-select__option--is-selected"
+      );
+      if (!menuList || !option) return;
+      menuList.scrollTop =
+        option.offsetTop - (menuList.clientHeight - option.offsetHeight) / 2;
     });
   };
 
+  const logos = [
+    { src: viteLogo, className: "logo" },
+    { src: dross, className: "logo dross" },
+    { src: viteLogo, className: "logo" },
+  ];
+
   return (
     <>
-      {confettiPosition && (
+      {confettiBursts.map(({ id, width, height, source }) => (
         <ReactConfetti
+          key={id}
           recycle={false}
           numberOfPieces={200}
-          confettiSource={confettiPosition}
-          onConfettiComplete={() => setConfettiPosition(null)}
+          width={width}
+          height={height}
+          confettiSource={source}
+          onConfettiComplete={() =>
+            setConfettiBursts((bursts) => bursts.filter((b) => b.id !== id))
+          }
           style={{
             position: "fixed",
             top: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
             pointerEvents: "none",
           }}
         />
-      )}
+      ))}
       <div className="logo-container">
-        <img
-          src={viteLogo}
-          className="logo"
-          alt="Christmas tree"
-          onClick={handleLogoClick}
-          style={{ cursor: "pointer" }}
-        />
-        <img
-          src={dross}
-          className="logo dross"
-          alt="React logo"
-          onClick={handleLogoClick}
-          style={{ cursor: "pointer" }}
-        />
-        <img
-          src={viteLogo}
-          className="logo"
-          alt="Christmas tree"
-          onClick={handleLogoClick}
-          style={{ cursor: "pointer" }}
-        />
+        {logos.map((logo, i) => (
+          <button
+            key={i}
+            type="button"
+            className="logo-button"
+            aria-label="Launch confetti"
+            onClick={handleLogoClick}
+          >
+            <img src={logo.src} className={logo.className} alt="" />
+          </button>
+        ))}
       </div>
       <h1>Christmas Gift Exchange</h1>
       <Select
-        options={options}
+        options={yearOptions}
+        value={selected}
         onChange={setSelected}
+        isSearchable={false}
+        aria-label="Year"
+        classNamePrefix="year-select"
+        onMenuOpen={centerSelectedYear}
         styles={{
           control: (styles) => ({
             ...styles,
-            backgroundColor: "#1A1A1A",
+            backgroundColor: "var(--surface)",
           }),
-          option: (styles) => ({
+          menu: (styles) => ({
             ...styles,
-            backgroundColor: "#1A1A1A",
+            backgroundColor: "var(--surface)",
+          }),
+          option: (styles, { isFocused, isSelected }) => ({
+            ...styles,
+            backgroundColor: isSelected
+              ? "var(--selected)"
+              : isFocused
+                ? "var(--surface-hover)"
+                : "var(--surface)",
+            color: "var(--text-strong)",
+            fontWeight: isSelected ? "bold" : "normal",
           }),
           singleValue: (styles) => ({
             ...styles,
-            color: "#F9F9F9",
+            color: "var(--text-strong)",
           }),
         }}
       />
