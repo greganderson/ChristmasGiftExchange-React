@@ -73,9 +73,6 @@ function App() {
       w: 0,
       h: 0,
     });
-
-    // Reset confetti after 2 seconds
-    setTimeout(() => setConfettiPosition(null), 2000);
   };
 
   return (
@@ -85,6 +82,7 @@ function App() {
           recycle={false}
           numberOfPieces={200}
           confettiSource={confettiPosition}
+          onConfettiComplete={() => setConfettiPosition(null)}
           style={{
             position: "fixed",
             top: 0,
