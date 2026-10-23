@@ -20,3 +20,4 @@ npm run lint
 ## Deployment
 
 Deployed on Railway with Nixpacks (`nixpacks.toml`), which serves the built `dist/` folder with Caddy (`Caddyfile`).
+
